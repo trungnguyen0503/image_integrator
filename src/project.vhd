@@ -81,6 +81,7 @@ package project is
       c_sel        : in  std_logic_vector(1 downto 0);
       alu_sel      : in  std_logic;
       d_sel        : in  std_logic;
+      pixel_rst    : in  std_logic;
       r_le_src_row : out std_logic;
       c_le_src_row : out std_logic
     );
@@ -88,16 +89,16 @@ package project is
 
   component memory is
     generic (
-        ADDR_WIDTH      : integer;
-        DATA_BYTE_WIDTH : integer
+      ADDR_WIDTH      : integer;
+      DATA_BYTE_WIDTH : integer
     );
     port (
-        clk     : in std_logic;
-        r_en    : in std_logic;
-        w_en    : in std_logic;
-        addr    : in std_logic_vector(ADDR_WIDTH - 1 downto 0);
-        d_in    : in std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
-        d_out   : out std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0)
+      clk   : in  std_logic;
+      r_en  : in  std_logic;
+      w_en  : in  std_logic;
+      addr  : in  std_logic_vector(ADDR_WIDTH - 1 downto 0);
+      d_in  : in  std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
+      d_out : out std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0)
     );
   end component;
 end package;

@@ -32,6 +32,7 @@ entity data_path is
     c_sel        : in  std_logic_vector(1 downto 0);
     alu_sel      : in  std_logic;
     d_sel        : in  std_logic;
+    pixel_rst    : in  std_logic;
     r_le_src_row : out std_logic;
     c_le_src_row : out std_logic
   );
@@ -127,7 +128,7 @@ begin
   reg_pixel: reg
     generic map (DATA_BYTE_WIDTH => DATA_BYTE_WIDTH)
     port map (
-      rst => rst,
+      rst => pixel_rst or rst,
       clk => clk,
       en  => '1',
       d   => alu_out,
@@ -136,5 +137,4 @@ begin
   d_in <= pixel_out when d_sel = '0' else (others => '0');
 
   -- TODO: Connection to memory interface
-
 end architecture;
