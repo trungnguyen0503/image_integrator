@@ -3,10 +3,6 @@ library ieee;
   use ieee.numeric_std.all;
   use work.project.all;
 
-library ieee;
-  use ieee.std_logic_1164.all;
-  use ieee.numeric_std.all;
-
 entity data_path is
   generic (
     INDEX_WIDTH     : integer;
@@ -140,4 +136,5 @@ begin
   d_in <= pixel_out when d_sel = '0' else (others => '0');
 
   -- TODO: Connection to memory interface
+
 end architecture;
