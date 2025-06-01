@@ -88,7 +88,6 @@ package project is
 
   component memory is
     generic (
-        MEM_SIZE        : integer := 1024;
         ADDR_WIDTH      : integer;
         DATA_BYTE_WIDTH : integer
     );

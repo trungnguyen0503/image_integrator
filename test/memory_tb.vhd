@@ -4,54 +4,59 @@ library ieee;
   use work.project.all;
 
 entity memory_tb is
-end memory_tb;
+end entity;
 
-architecture rtl of memory_tb is
-  constant MEM_SIZE         : integer := 1024;
-  constant ADDR_WIDTH       : integer := 32;
-  constant DATA_BYTE_WIDTH  : integer := 1;
-  constant CLK_PERIOD       : time := 10 ns;
+architecture behavior of memory_tb is
+  constant ADDR_WIDTH      : integer := 32;
+  constant DATA_BYTE_WIDTH : integer := 1;
+  constant CLK_PERIOD      : time    := 10 ns;
 
-  signal clk     : std_logic := '1';
-  signal r_en    : std_logic;
-  signal w_en    : std_logic;
-  signal addr    : std_logic_vector(ADDR_WIDTH - 1 downto 0);
-  signal d_in    : std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
-  signal d_out   : std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
+  signal clk   : std_logic := '0';
+  signal r_en  : std_logic;
+  signal w_en  : std_logic;
+  signal addr  : std_logic_vector(ADDR_WIDTH - 1 downto 0);
+  signal d_in  : std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
+  signal d_out : std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
 begin
-  dut : memory 
-    generic map(
-      MEM_SIZE => MEM_SIZE,
-      ADDR_WIDTH => ADDR_WIDTH,
+  dut: memory
+    generic map (
+      ADDR_WIDTH      => ADDR_WIDTH,
       DATA_BYTE_WIDTH => DATA_BYTE_WIDTH
     )
     port map (
-      clk => clk,
-      r_en => r_en,
-      w_en => w_en,
-      addr => addr,
-      d_in => d_in,
+      clk   => clk,
+      r_en  => r_en,
+      w_en  => w_en,
+      addr  => addr,
+      d_in  => d_in,
       d_out => d_out
     );
 
-  clk <=  not clk after CLK_PERIOD/2;
   process
   begin
-    -- TC 1: Write data to memory
-    wait for CLK_PERIOD;
+    -- Test case 1: Write and read back a value
     w_en <= '1';
     r_en <= '0';
-    
-    wait for CLK_PERIOD;
     addr <= std_logic_vector(to_unsigned(20, ADDR_WIDTH));
-    d_in <= (0 => '1', others => '0');
-    
-    wait for CLK_PERIOD*3;
-    -- TC 2: Read data from memory
+    d_in <= std_logic_vector(to_unsigned(42, 8 * DATA_BYTE_WIDTH));
+
+    clk <= '1';
+    wait for CLK_PERIOD / 2;
+    clk <= '0';
+    wait for CLK_PERIOD / 2;
+
     w_en <= '0';
     r_en <= '1';
     addr <= std_logic_vector(to_unsigned(20, ADDR_WIDTH));
-    wait;
-  end process; 
+    clk <= '1';
+    wait for CLK_PERIOD / 2;
+    clk <= '0';
+    wait for CLK_PERIOD / 2;
+    assert d_out = d_in
+      report "Test case 1 failed"
+      severity error;
 
-end rtl;
+    wait;
+  end process;
+
+end architecture;
