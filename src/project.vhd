@@ -86,4 +86,19 @@ package project is
     );
   end component;
 
+  component memory is
+    generic (
+        MEM_SIZE        : integer := 1024;
+        ADDR_WIDTH      : integer;
+        DATA_BYTE_WIDTH : integer
+    );
+    port (
+        clk     : in std_logic;
+        r_en    : in std_logic;
+        w_en    : in std_logic;
+        addr    : in std_logic_vector(ADDR_WIDTH - 1 downto 0);
+        d_in    : in std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
+        d_out   : out std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0)
+    );
+  end component;
 end package;
