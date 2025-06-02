@@ -15,14 +15,14 @@ package project is
   end component;
 
   component counter is
-    generic (DATA_BYTE_WIDTH : integer);
+    generic (DATA_WIDTH : integer);
     port (
       rst : in  std_logic;
       clk : in  std_logic;
       en  : in  std_logic;
       set : in  std_logic;
-      d   : in  std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
-      q   : out std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0)
+      d   : in  std_logic_vector(DATA_WIDTH - 1 downto 0);
+      q   : out std_logic_vector(DATA_WIDTH - 1 downto 0)
     );
   end component;
 
@@ -73,9 +73,12 @@ package project is
       addr         : out std_logic_vector(ADDR_WIDTH - 1 downto 0);
       d_in         : out std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
       -- controller
-      cnt_set      : in  std_logic;
+      r_cnt_set    : in  std_logic;
       r_cnt_en     : in  std_logic;
+      r_cnt_val    : in  std_logic;
+      c_cnt_set    : in  std_logic;
       c_cnt_en     : in  std_logic;
+      c_cnt_val    : in  std_logic;
       base_sel     : in  std_logic;
       r_sel        : in  std_logic_vector(1 downto 0);
       c_sel        : in  std_logic_vector(1 downto 0);
@@ -101,4 +104,60 @@ package project is
       d_out : out std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0)
     );
   end component;
+
+  component controller is
+    port (
+      rst          : in  std_logic;
+      clk          : in  std_logic;
+
+      start        : in  std_logic;
+      size_error   : in  std_logic;
+      r_le_src_row : in  std_logic;
+      c_le_src_col : in  std_logic;
+
+      done         : out std_logic;
+      r_cnt_set    : out std_logic;
+      r_cnt_en     : out std_logic;
+      r_cnt_val    : out std_logic;
+      c_cnt_set    : out std_logic;
+      c_cnt_en     : out std_logic;
+      c_cnt_val    : out std_logic;
+      r_sel        : out std_logic_vector(1 downto 0);
+      c_sel        : out std_logic_vector(1 downto 0);
+      base_sel     : out std_logic;
+      d_sel        : out std_logic;
+      alu_sel      : out std_logic;
+      pixel_rst    : out std_logic;
+      r_en         : out std_logic;
+      w_en         : out std_logic
+    );
+  end component;
+
+  component image_integrator is
+    generic (
+      ADDR_WIDTH      : integer;
+      INDEX_WIDTH     : integer;
+      DATA_BYTE_WIDTH : integer
+    );
+    port (
+      -- reset and clock
+      rst        : in  std_logic;
+      clk        : in  std_logic;
+      -- user
+      start      : in  std_logic;
+      src_addr   : in  std_logic_vector(ADDR_WIDTH - 1 downto 0);
+      dst_addr   : in  std_logic_vector(ADDR_WIDTH - 1 downto 0);
+      src_col    : in  std_logic_vector(INDEX_WIDTH - 1 downto 0);
+      src_row    : in  std_logic_vector(INDEX_WIDTH - 1 downto 0);
+      size_error : out std_logic;
+      done       : out std_logic;
+      -- memory
+      r_en       : out std_logic;
+      w_en       : out std_logic;
+      d_out      : in  std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
+      addr       : out std_logic_vector(ADDR_WIDTH - 1 downto 0);
+      d_in       : out std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0)
+    );
+  end component;
+
 end package;

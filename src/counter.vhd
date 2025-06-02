@@ -4,19 +4,19 @@ library ieee;
   use work.project.all;
 
 entity counter is
-  generic (DATA_BYTE_WIDTH : integer);
+  generic (DATA_WIDTH : integer);
   port (
     rst : in  std_logic;
     clk : in  std_logic;
     en  : in  std_logic;
     set : in  std_logic;
-    d   : in  std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
-    q   : out std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0)
+    d   : in  std_logic_vector(DATA_WIDTH - 1 downto 0);
+    q   : out std_logic_vector(DATA_WIDTH - 1 downto 0)
   );
 end entity;
 
 architecture rtl of counter is
-  signal q_tmp : std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0) := (others => '0');
+  signal q_tmp : std_logic_vector(DATA_WIDTH - 1 downto 0) := (others => '0');
 begin
   q <= q_tmp;
 

@@ -24,9 +24,12 @@ entity data_path is
     addr         : out std_logic_vector(ADDR_WIDTH - 1 downto 0);
     d_in         : out std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
     -- controller
-    cnt_set      : in  std_logic;
+    r_cnt_set    : in  std_logic;
     r_cnt_en     : in  std_logic;
+    r_cnt_val    : in  std_logic;
+    c_cnt_set    : in  std_logic;
     c_cnt_en     : in  std_logic;
+    c_cnt_val    : in  std_logic;
     base_sel     : in  std_logic;
     r_sel        : in  std_logic_vector(1 downto 0);
     c_sel        : in  std_logic_vector(1 downto 0);
@@ -39,69 +42,53 @@ entity data_path is
 end entity;
 
 architecture rtl of data_path is
-  signal r         : std_logic_vector(INDEX_WIDTH - 1 downto 0);
-  signal c         : std_logic_vector(INDEX_WIDTH - 1 downto 0);
-  signal r_prev    : std_logic_vector(INDEX_WIDTH - 1 downto 0);
-  signal c_prev    : std_logic_vector(INDEX_WIDTH - 1 downto 0);
-  signal base_addr : std_logic_vector(ADDR_WIDTH - 1 downto 0);
-  signal r_final   : std_logic_vector(INDEX_WIDTH - 1 downto 0);
-  signal c_final   : std_logic_vector(INDEX_WIDTH - 1 downto 0);
-  signal alu_out   : std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
-  signal pixel_out : std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
+  signal r               : std_logic_vector(INDEX_WIDTH - 1 downto 0);
+  signal r_final         : std_logic_vector(INDEX_WIDTH - 1 downto 0);
+  signal r_cnt_val_final : std_logic_vector(INDEX_WIDTH - 1 downto 0);
+  signal c               : std_logic_vector(INDEX_WIDTH - 1 downto 0);
+  signal c_final         : std_logic_vector(INDEX_WIDTH - 1 downto 0);
+  signal c_cnt_val_final : std_logic_vector(INDEX_WIDTH - 1 downto 0);
+  signal base_addr       : std_logic_vector(ADDR_WIDTH - 1 downto 0);
+  signal alu_out         : std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
+  signal pixel_out       : std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
+  signal pixel_rst_final : std_logic;
 begin
   size_error <= '1' when not (5 <= unsigned(src_col) and unsigned(src_col) <= 255 and 5 <= unsigned(src_row) and unsigned(src_row) <= 255) else '0';
 
+  r_cnt_val_final <= std_logic_vector(to_unsigned(0, INDEX_WIDTH - 1)) & r_cnt_val;
   counter_r: counter
-    generic map (DATA_BYTE_WIDTH => DATA_BYTE_WIDTH)
+    generic map (DATA_WIDTH => INDEX_WIDTH)
     port map (
       rst => rst,
       clk => clk,
       en  => r_cnt_en,
-      set => cnt_set,
-      d   => (1 => '1', others => '0'),
+      set => r_cnt_set,
+      d   => r_cnt_val_final,
       q   => r
     );
+  c_cnt_val_final <= std_logic_vector(to_unsigned(0, INDEX_WIDTH - 1)) & c_cnt_val;
   counter_c: counter
-    generic map (DATA_BYTE_WIDTH => DATA_BYTE_WIDTH)
+    generic map (DATA_WIDTH => INDEX_WIDTH)
     port map (
       rst => rst,
       clk => clk,
       en  => c_cnt_en,
-      set => cnt_set,
-      d   => (1 => '1', others => '0'),
+      set => c_cnt_set,
+      d   => c_cnt_val_final,
       q   => c
     );
 
-  reg_r_prev: reg
-    generic map (DATA_BYTE_WIDTH => DATA_BYTE_WIDTH)
-    port map (
-      rst => rst,
-      clk => clk,
-      en  => '1',
-      d   => r,
-      q   => r_prev
-    );
-  reg_c_prev: reg
-    generic map (DATA_BYTE_WIDTH => DATA_BYTE_WIDTH)
-    port map (
-      rst => rst,
-      clk => clk,
-      en  => '1',
-      d   => c,
-      q   => c_prev
-    );
-
   r_le_src_row <= '1' when unsigned(r) <= unsigned(src_row) else '0';
-  c_le_src_row <= '1' when unsigned(c) <= unsigned(src_row) else '0';
+  c_le_src_row <= '1' when unsigned(c) <= unsigned(src_col) else '0';
 
   base_addr <= src_addr when base_sel = '0' else dst_addr;
 
   r_final <= (others => '0') when r_sel = "00" else
             r                when r_sel = "01" else
-            r_prev;
+            std_logic_vector(unsigned(r) - 1);
   c_final <= (others => '0') when c_sel = "00" else
             c                when c_sel = "01" else
-            c_prev;
+            std_logic_vector(unsigned(c) - 1);
   address_calc_block: address_calc
     generic map (
       INDEX_WIDTH     => INDEX_WIDTH,
@@ -125,10 +112,11 @@ begin
       b   => d_out,
       z   => alu_out
     );
+  pixel_rst_final <= rst or pixel_rst;
   reg_pixel: reg
     generic map (DATA_BYTE_WIDTH => DATA_BYTE_WIDTH)
     port map (
-      rst => pixel_rst or rst,
+      rst => pixel_rst_final,
       clk => clk,
       en  => '1',
       d   => alu_out,
