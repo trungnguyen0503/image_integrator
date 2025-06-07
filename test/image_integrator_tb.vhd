@@ -98,11 +98,13 @@ begin
   begin
 
     -- Test case 1: All pixels = 1
+    report "Test case 1: All pixels = 1";
     rst <= '1';
+    start <= '0';
     wait for CLK_PERIOD;
     rst <= '0';
 
-    -- Write source image
+    -- Write source image with all pixels = 1
     mode_user <= '1';
     w_en_user <= '1';
     wait for CLK_PERIOD;
@@ -121,21 +123,23 @@ begin
     src_row <= std_logic_vector(to_unsigned(ROW, INDEX_WIDTH));
     src_col <= std_logic_vector(to_unsigned(COL, INDEX_WIDTH));
 
-    -- Start 
+    -- Start
     wait for CLK_PERIOD;
+    report "Start calculate";
     mode_user <= '0';
     start <= '1';
     wait until done = '1';
+    report "Test case 1 is complete!";
     wait for CLK_PERIOD;
 
-    -- Test case 2:
+    -- Test case 2: All pixels = 255
+    report "Test case 2: All pixels = 255";
     start <= '0';
     rst <= '1';
     wait for CLK_PERIOD;
     rst <= '0';
     
-
-    -- write source image 6x6 with data input = 255
+    -- Write source image 6x6 with all pixels = 255
     mode_user <= '1';
     w_en_user <= '1';
     wait for CLK_PERIOD;
@@ -146,6 +150,7 @@ begin
         wait for CLK_PERIOD;
       end loop;
     end loop;
+    w_en_user <= '0';
 
     -- Set inputs
     src_addr <= std_logic_vector(to_unsigned(TEST_SRC_ADDR, ADDR_WIDTH));
@@ -155,30 +160,114 @@ begin
 
     -- Start
     wait for CLK_PERIOD;
+    report "Start calculate";
     mode_user <= '0';
     start <= '1';
     wait until done = '1';
+    report "Test case 2 is complete!";
     wait for CLK_PERIOD;
 
     -- Test case 3: Invalid row and column values
+    report "Test case 3: Invalid row and column values";
     rst <= '1';
     start <= '0';
     wait for CLK_PERIOD;
     rst <= '0';
-    
+
+    -- Set input
     src_addr <= std_logic_vector(to_unsigned(TEST_SRC_ADDR, ADDR_WIDTH));
     dst_addr <= std_logic_vector(to_unsigned(TEST_DST_ADDR, ADDR_WIDTH));
-    src_row <= std_logic_vector(to_unsigned(MAX_ROW + 1, INDEX_WIDTH));
-    src_col <= std_logic_vector(to_unsigned(MIN_COL, INDEX_WIDTH));
+    src_row <= std_logic_vector(to_unsigned(MAX_ROW + 1, INDEX_WIDTH)); -- ROW = 256
+    src_col <= std_logic_vector(to_unsigned(MIN_COL, INDEX_WIDTH));     -- COL = 6
 
+    -- Start
     wait for CLK_PERIOD;
+    report "Start calculate";
     mode_user <= '0';
     start <= '1';
     wait until done = '1';
+    report "Test case 3 is complete!";
+    wait for CLK_PERIOD;
+
+    -- Test case 4: Image 5x10 with all pixel = 1
+    report "Test case 4: Image 5x10 with all pixel = 1";
+    start <= '0';
+    rst <= '1';
+    wait for CLK_PERIOD;
+    rst <= '0';
+    
+
+    -- write source image
+    mode_user <= '1';
+    w_en_user <= '1';
+    wait for CLK_PERIOD;
+    for r in 0 to ROW - 2 loop
+      for c in 0 to COL + 4 loop
+        addr_user <= std_logic_vector(to_unsigned(TEST_SRC_ADDR + r * COL + c, ADDR_WIDTH));
+        d_in_user <= std_logic_vector(to_unsigned(255, 8 * DATA_BYTE_WIDTH));
+        wait for CLK_PERIOD;
+      end loop;
+    end loop;
+    w_en_user <= '0';
+
+    -- Set inputs
+    src_addr <= std_logic_vector(to_unsigned(TEST_SRC_ADDR, ADDR_WIDTH));
+    dst_addr <= std_logic_vector(to_unsigned(TEST_DST_ADDR, ADDR_WIDTH));
+    src_row <= std_logic_vector(to_unsigned(ROW - 1, INDEX_WIDTH));   -- ROW = 5
+    src_col <= std_logic_vector(to_unsigned(COL + 4, INDEX_WIDTH));   -- COL = 10
+
+    -- Start
+    wait for CLK_PERIOD;
+    report "Start calculate";
+    mode_user <= '0';
+    start <= '1';
+    wait until done = '1';
+    report "Test case 4 is complete!";
+    wait for CLK_PERIOD;
 
 
+    -- Test case 5: SRC_ADDR == DST_ADDR
+    report "Test case 5: SRC_ADDR == DST_ADDR";
+    start <= '0';
+    rst <= '1';
+    wait for CLK_PERIOD;
+    rst <= '0';
+
+    -- Write source image
+    mode_user <= '1';
+    w_en_user <= '1';
+    wait for CLK_PERIOD;
+    
+    -- Write source image with all pixel = 1
+    mode_user <= '1';
+    w_en_user <= '1';
+    wait for CLK_PERIOD;
+    for r in 0 to ROW - 1 loop
+      for c in 0 to COL - 1 loop
+        addr_user <= std_logic_vector(to_unsigned(TEST_SRC_ADDR + r * COL + c, ADDR_WIDTH));
+        d_in_user <= std_logic_vector(to_unsigned(1, 8 * DATA_BYTE_WIDTH));
+        wait for CLK_PERIOD;
+      end loop;
+    end loop;
+    w_en_user <= '0';
+
+    -- Set inputs
+    src_addr <= std_logic_vector(to_unsigned(TEST_SRC_ADDR, ADDR_WIDTH));
+    dst_addr <= std_logic_vector(to_unsigned(TEST_SRC_ADDR, ADDR_WIDTH));
+    src_row <= std_logic_vector(to_unsigned(ROW, INDEX_WIDTH));
+    src_col <= std_logic_vector(to_unsigned(COL, INDEX_WIDTH));
+
+    -- Start
+    wait for CLK_PERIOD;
+    report "Start calculate";
+    mode_user <= '0';
+    start <= '1';
+    wait until done = '1';
+    report "Test case 5 is complete!";
+    wait for CLK_PERIOD;
+    
+    -- Test case 6: 
     wait;
   end process;
-
 
 end architecture;
