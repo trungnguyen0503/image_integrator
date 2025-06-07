@@ -20,7 +20,7 @@ end entity;
 
 architecture mock_1kb of memory is
   constant MEM_BYTE_SIZE : integer := 2 ** 10; -- 1 KB
-  type mem_array is array (MEM_BYTE_SIZE - 1 downto 0) of std_logic_vector(7 downto 0);
+  type mem_array is array (0 to MEM_BYTE_SIZE - 1) of std_logic_vector(7 downto 0);
   signal mem : mem_array;
 
 begin
@@ -28,7 +28,6 @@ begin
   begin
     if rising_edge(clk) then
       if w_en = '1' then
-        mem(to_integer(unsigned(addr))) <= d_in;
         for i in DATA_BYTE_WIDTH - 1 downto 0 loop
           mem(to_integer(unsigned(addr)) + i) <= d_in(8 * (i + 1) - 1 downto 8 * i);
         end loop;

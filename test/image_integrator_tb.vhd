@@ -40,7 +40,7 @@ architecture behavior of image_integrator_tb is
 
   signal mode_user : std_logic := '1';
 
-  constant CLK_PERIOD : time := 1 ns;
+  constant CLK_PERIOD : time := 2 ns;
 begin
   r_en_final <= r_en_user when mode_user = '1' else r_en;
   w_en_final <= w_en_user when mode_user = '1' else w_en;
@@ -87,16 +87,23 @@ begin
   clk <= not clk after CLK_PERIOD / 2;
 
   process
-    constant TEST_SRC_ADDR : integer := 16;
+    constant TEST_SRC_ADDR : integer := 0;
     constant TEST_DST_ADDR : integer := 64;
     constant ROW           : integer := 6;
     constant COL           : integer := 6;
+    constant MAX_ROW       : integer := 255;
+    constant MAX_COL       : integer := 255;
+    constant MIN_ROW       : integer := 5;
+    constant MIN_COL       : integer := 5;
   begin
+
+    -- Test case 1: All pixels = 1
     rst <= '1';
     wait for CLK_PERIOD;
     rst <= '0';
 
     -- Write source image
+    mode_user <= '1';
     w_en_user <= '1';
     wait for CLK_PERIOD;
     for r in 0 to ROW - 1 loop
@@ -114,12 +121,64 @@ begin
     src_row <= std_logic_vector(to_unsigned(ROW, INDEX_WIDTH));
     src_col <= std_logic_vector(to_unsigned(COL, INDEX_WIDTH));
 
+    -- Start 
+    wait for CLK_PERIOD;
+    mode_user <= '0';
+    start <= '1';
+    wait until done = '1';
+    wait for CLK_PERIOD;
+
+    -- Test case 2:
+    start <= '0';
+    rst <= '1';
+    wait for CLK_PERIOD;
+    rst <= '0';
+    
+
+    -- write source image 6x6 with data input = 255
+    mode_user <= '1';
+    w_en_user <= '1';
+    wait for CLK_PERIOD;
+    for r in 0 to ROW - 1 loop
+      for c in 0 to COL - 1 loop
+        addr_user <= std_logic_vector(to_unsigned(TEST_SRC_ADDR + r * COL + c, ADDR_WIDTH));
+        d_in_user <= std_logic_vector(to_unsigned(255, 8 * DATA_BYTE_WIDTH));
+        wait for CLK_PERIOD;
+      end loop;
+    end loop;
+
+    -- Set inputs
+    src_addr <= std_logic_vector(to_unsigned(TEST_SRC_ADDR, ADDR_WIDTH));
+    dst_addr <= std_logic_vector(to_unsigned(TEST_DST_ADDR, ADDR_WIDTH));
+    src_row <= std_logic_vector(to_unsigned(ROW, INDEX_WIDTH));
+    src_col <= std_logic_vector(to_unsigned(COL, INDEX_WIDTH));
+
+    -- Start
+    wait for CLK_PERIOD;
+    mode_user <= '0';
+    start <= '1';
+    wait until done = '1';
+    wait for CLK_PERIOD;
+
+    -- Test case 3: Invalid row and column values
+    rst <= '1';
+    start <= '0';
+    wait for CLK_PERIOD;
+    rst <= '0';
+    
+    src_addr <= std_logic_vector(to_unsigned(TEST_SRC_ADDR, ADDR_WIDTH));
+    dst_addr <= std_logic_vector(to_unsigned(TEST_DST_ADDR, ADDR_WIDTH));
+    src_row <= std_logic_vector(to_unsigned(MAX_ROW + 1, INDEX_WIDTH));
+    src_col <= std_logic_vector(to_unsigned(MIN_COL, INDEX_WIDTH));
+
     wait for CLK_PERIOD;
     mode_user <= '0';
     start <= '1';
     wait until done = '1';
 
+
     wait;
   end process;
+
 
 end architecture;
