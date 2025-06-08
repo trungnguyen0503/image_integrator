@@ -91,8 +91,8 @@ begin
     constant TEST_DST_ADDR : integer := 64;
     constant ROW           : integer := 6;
     constant COL           : integer := 6;
-    constant MAX_ROW       : integer := 255;
-    constant MAX_COL       : integer := 255;
+    constant MAX_ROW       : integer := 256;
+    constant MAX_COL       : integer := 256;
     constant MIN_ROW       : integer := 5;
     constant MIN_COL       : integer := 5;
   begin
@@ -138,7 +138,7 @@ begin
     rst <= '1';
     wait for CLK_PERIOD;
     rst <= '0';
-    
+
     -- Write source image 6x6 with all pixels = 255
     mode_user <= '1';
     w_en_user <= '1';
@@ -178,7 +178,7 @@ begin
     src_addr <= std_logic_vector(to_unsigned(TEST_SRC_ADDR, ADDR_WIDTH));
     dst_addr <= std_logic_vector(to_unsigned(TEST_DST_ADDR, ADDR_WIDTH));
     src_row <= std_logic_vector(to_unsigned(MAX_ROW + 1, INDEX_WIDTH)); -- ROW = 256
-    src_col <= std_logic_vector(to_unsigned(MIN_COL, INDEX_WIDTH));     -- COL = 6
+    src_col <= std_logic_vector(to_unsigned(MIN_COL, INDEX_WIDTH)); -- COL = 6
 
     -- Start
     wait for CLK_PERIOD;
@@ -186,6 +186,9 @@ begin
     mode_user <= '0';
     start <= '1';
     wait until done = '1';
+    assert size_error = '1'
+      report "Test case 3: Size error should be set"
+      severity failure;
     report "Test case 3 is complete!";
     wait for CLK_PERIOD;
 
@@ -195,7 +198,6 @@ begin
     rst <= '1';
     wait for CLK_PERIOD;
     rst <= '0';
-    
 
     -- write source image
     mode_user <= '1';
@@ -213,8 +215,8 @@ begin
     -- Set inputs
     src_addr <= std_logic_vector(to_unsigned(TEST_SRC_ADDR, ADDR_WIDTH));
     dst_addr <= std_logic_vector(to_unsigned(TEST_DST_ADDR, ADDR_WIDTH));
-    src_row <= std_logic_vector(to_unsigned(ROW - 1, INDEX_WIDTH));   -- ROW = 5
-    src_col <= std_logic_vector(to_unsigned(COL + 4, INDEX_WIDTH));   -- COL = 10
+    src_row <= std_logic_vector(to_unsigned(ROW - 1, INDEX_WIDTH)); -- ROW = 5
+    src_col <= std_logic_vector(to_unsigned(COL + 4, INDEX_WIDTH)); -- COL = 10
 
     -- Start
     wait for CLK_PERIOD;
@@ -224,7 +226,6 @@ begin
     wait until done = '1';
     report "Test case 4 is complete!";
     wait for CLK_PERIOD;
-
 
     -- Test case 5: SRC_ADDR == DST_ADDR
     report "Test case 5: SRC_ADDR == DST_ADDR";
@@ -237,7 +238,7 @@ begin
     mode_user <= '1';
     w_en_user <= '1';
     wait for CLK_PERIOD;
-    
+
     -- Write source image with all pixel = 1
     mode_user <= '1';
     w_en_user <= '1';
@@ -265,7 +266,7 @@ begin
     wait until done = '1';
     report "Test case 5 is complete!";
     wait for CLK_PERIOD;
-    
+
     -- Test case 6: 
     wait;
   end process;

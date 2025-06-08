@@ -53,7 +53,7 @@ architecture rtl of data_path is
   signal pixel_out       : std_logic_vector(8 * DATA_BYTE_WIDTH - 1 downto 0);
   signal pixel_rst_final : std_logic;
 begin
-  size_error <= '1' when not (5 <= unsigned(src_col) and unsigned(src_col) <= 255 and 5 <= unsigned(src_row) and unsigned(src_row) <= 255) else '0';
+  size_error <= '1' when not (5 <= unsigned(src_col) and unsigned(src_col) <= 256 and 5 <= unsigned(src_row) and unsigned(src_row) <= 256) else '0';
 
   r_cnt_val_final <= std_logic_vector(to_unsigned(0, INDEX_WIDTH - 1)) & r_cnt_val;
   counter_r: counter
@@ -123,6 +123,4 @@ begin
       q   => pixel_out
     );
   d_in <= pixel_out when d_sel = '0' else (others => '0');
-
-  -- TODO: Connection to memory interface
 end architecture;
