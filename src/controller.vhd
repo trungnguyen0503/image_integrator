@@ -43,6 +43,8 @@ architecture behavior of controller is
     );
 
   signal state : state_t := S0;
+  signal done_tmp : std_logic_vector(7 downto 0);
+  signal done_out: std_logic_vector(7 downto 0);
 begin
   state_control: process (rst, clk)
   begin
@@ -193,8 +195,19 @@ begin
     '1' when S15,
     '0' when others;
 
-  with state select done <=
-    '1' when S20 | S21,
-    '0' when others;
+  with state select done_tmp <=
+    (0 => '1', others => '0') when S20 | S21,
+    (others => '0') when others;
+
+  done_reg : reg
+    generic map (DATA_BYTE_WIDTH => 1)
+    port map (
+      rst => rst,
+      clk => clk,
+      en  => '1',
+      d   => done_tmp,
+      q   => done_out
+    );
+  done <= done_out(0);
 
 end architecture;

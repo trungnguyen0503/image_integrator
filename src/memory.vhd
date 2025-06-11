@@ -33,7 +33,7 @@ begin
         end loop;
       elsif r_en = '1' then
         for i in DATA_BYTE_WIDTH - 1 downto 0 loop
-          d_out(8 * (i + 1) - 1 downto 8 * i) <= mem(to_integer(unsigned(addr)) + i);
+          d_out(8 * (i + 1) - 1 downto 8 * i) <= mem(to_integer(unsigned(addr)) + i) after 1 ns;
         end loop;
       end if;
     end if;
