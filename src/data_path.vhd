@@ -37,7 +37,7 @@ entity data_path is
     d_sel        : in  std_logic;
     pixel_rst    : in  std_logic;
     r_le_src_row : out std_logic;
-    c_le_src_row : out std_logic
+    c_le_src_col : out std_logic
   );
 end entity;
 
@@ -79,7 +79,7 @@ begin
     );
 
   r_le_src_row <= '1' when unsigned(r) <= unsigned(src_row) else '0';
-  c_le_src_row <= '1' when unsigned(c) <= unsigned(src_col) else '0';
+  c_le_src_col <= '1' when unsigned(c) <= unsigned(src_col) else '0';
 
   base_addr <= src_addr when base_sel = '0' else dst_addr;
 

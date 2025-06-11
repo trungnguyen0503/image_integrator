@@ -81,7 +81,7 @@ begin
       d_sel        => d_sel,
       pixel_rst    => pixel_rst,
       r_le_src_row => r_le_src_row,
-      c_le_src_row => c_le_src_col
+      c_le_src_col => c_le_src_col
     );
 
   controller_block: controller

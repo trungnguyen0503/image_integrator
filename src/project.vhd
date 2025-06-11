@@ -86,7 +86,7 @@ package project is
       d_sel        : in  std_logic;
       pixel_rst    : in  std_logic;
       r_le_src_row : out std_logic;
-      c_le_src_row : out std_logic
+      c_le_src_col : out std_logic
     );
   end component;
 
